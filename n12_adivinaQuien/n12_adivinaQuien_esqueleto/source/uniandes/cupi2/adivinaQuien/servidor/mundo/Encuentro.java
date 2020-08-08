@@ -563,7 +563,6 @@ public class Encuentro extends Thread
         		throw new AdivinaQuienServidorException("F");
         	}
         }
-        System.out.println("jugador 1 nombre es: " + reg1.darNombreJugador() + " jugador 2 nombre es: " + reg2.darNombreJugador());
         
         jugador2 = new JugadorRemoto( reg2 );
        
@@ -666,62 +665,82 @@ public class Encuentro extends Thread
         
         if(lineaJugada != null)
         {
-        	// Reenviar la pregunta del jugador que esta preguntado
-        	try {
-        		enviarPreguntaDeJugador(jugador2Out, lineaJugada);
-        	}catch(Exception e) {
-        		e.printStackTrace();
-        		return;
+        	String comando = lineaJugada.split(SEPARADOR_COMANDO)[0];
+        	if(comando.equals(JUGADA)) {
+	        	// Reenviar la pregunta del jugador que esta preguntado
+	        	try {
+	        		enviarPreguntaDeJugador(jugador2Out, lineaJugada);
+	        	}catch(Exception e) {
+	        		e.printStackTrace();
+	        		return;
+	        	}
+	        	// respuesta de si o no de parte del contrincante
+	        	String respuestaPregunta = jugador2In.readLine();
+	        	
+	        	try {
+	        		enviarRespuestaJugador(jugador1Out, respuestaPregunta);
+	        	}catch(Exception e) {
+	        		e.printStackTrace();
+	        		return;
+	        	}
+	        	
+	        	//cantidad de personas que quedan en el tablero de la persona
+	        	String cantidadDePersonas = jugador1In.readLine();
+	        	
+	        	String[] partes = cantidadDePersonas.split( SEPARADOR_COMANDO );
+	        	
+	        	
+	        	if(partes[1].compareTo("1") == 0) {
+	        		String guest = jugador1In.readLine();
+	        		guest = guest.split(SEPARADOR_COMANDO)[1];
+	        		finJuego = determinarVictoria(jugador1Out, jugador2Out, jugador, guest);
+	        	}
+	        	else 
+	        		notificarTurno(jugador2Out);
+	        	
         	}
-        	// respuesta de si o no de parte del contrincante
-        	String respuestaPregunta = jugador2In.readLine();
-        	
-        	try {
-        		enviarRespuestaJugador(jugador1Out, respuestaPregunta);
-        	}catch(Exception e) {
-        		e.printStackTrace();
-        		return;
+        	else {
+        		String guest = lineaJugada.split(SEPARADOR_COMANDO)[1];
+        		finJuego = determinarVictoria(jugador1Out, jugador2Out, jugador, guest);
         	}
-        	
-        	//cantidad de personas que quedan en el tablero de la persona
-        	String cantidadDePersonas = jugador1In.readLine();
-        	
-        	String[] partes = cantidadDePersonas.split( SEPARADOR_COMANDO );
-        	
-        	if(partes[1].compareTo("1") == 0) {
-        		String guest = jugador1In.readLine();
-        		partes = guest.split(SEPARADOR_COMANDO);
-        		if(jugador == 1) {
-        			if(asignado2.compareTo(partes[1]) == 0) {
-        				enviarRespuestaAdivinar(jugador1Out, true);
-        				jugador1.cambiarVictoria();
-        				finJuego = true;
-        			}
-        			else {
-        				enviarRespuestaAdivinar(jugador1Out, false);
-        				notificarTurno(jugador2Out);
-        			}
-        		}
-        		else {
-        			if(asignado1.compareTo(partes[1]) == 0) {
-        				enviarRespuestaAdivinar(jugador1Out, true);
-        				jugador2.cambiarVictoria();
-        				finJuego = true;
-        			}
-        			else {
-        				enviarRespuestaAdivinar(jugador1Out, false);
-        				notificarTurno(jugador2Out);
-        			}
-        		}
-        	}
-        	else 
-        		notificarTurno(jugador2Out);
-        	
-        	// Rvisar el resultado para saber si el encuentro termina y actualizar los puntajes
-        		
-        	}
+        }
     }
         
+    
+    /**
+     * Metodo que determian cual de los jugadores gano la partida
+     * @param jugador1Out
+     * @param jugador2Out
+     * @param jugador
+     * @param guest
+     * @return
+     */
+    private boolean determinarVictoria(PrintWriter jugador1Out,  PrintWriter jugador2Out, int jugador, String guest) {
+    	boolean ans = false;
+    	if(jugador == 1) {
+			if(asignado2.compareTo(guest) == 0) {
+				enviarRespuestaAdivinar(jugador1Out, true);
+				jugador1.cambiarVictoria();
+				ans = true;
+			}
+			else {
+				enviarRespuestaAdivinar(jugador1Out, false);
+				notificarTurno(jugador2Out);
+			}
+		}
+		else {
+			if(asignado1.compareTo(guest) == 0) {
+				enviarRespuestaAdivinar(jugador1Out, true);
+				jugador2.cambiarVictoria();
+				ans = true;
+			}
+			else {
+				enviarRespuestaAdivinar(jugador1Out, false);
+				notificarTurno(jugador2Out);
+			}
+		}
+    	return ans;
+    }
     
     
     // -----------------------------------------------------------------
