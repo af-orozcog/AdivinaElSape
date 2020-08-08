@@ -89,7 +89,7 @@ public class RegistroJugador {
      */
     public String toString( )
     {
-        return  nombre + "- Ganadas: " + ganados + " - Perdidas: " + perdidos;
+        return  login + "- Ganadas: " + ganados + " - Perdidas: " + perdidos;
     }
 
 

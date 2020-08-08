@@ -115,10 +115,10 @@ public class AdministradorUsuarios
 		if ( resultado.next() )
 		{
 			String nombre = resultado.getString(1);
-			sql = "SELECT cantidadGanadas, cantidadPerdidas FROM resultados WHERE login ='" + pLogin;
+			sql = "SELECT cantidadGanadas, cantidadPerdidas FROM resultados WHERE login ='" + pLogin + "'";
 			st = conexion.createStatement( );
 			resultado = st.executeQuery( sql );
-			resultado = st.executeQuery( sql );
+			resultado.next();
 			int ganadosP = resultado.getInt(1);
 			int perdidosP = resultado.getInt(2);
 			registro = new RegistroJugador ( nombre,pLogin ,ganadosP, perdidosP);
@@ -165,7 +165,7 @@ public class AdministradorUsuarios
 			 int cantidadGanadas = resultado.getInt( 2 );
 			 int cantidadPerdidas = resultado.getInt( 3 );
 			 
-			 RegistroJugador registro = new RegistroJugador ( login, null,cantidadGanadas, cantidadPerdidas );
+			 RegistroJugador registro = new RegistroJugador ( null, login,cantidadGanadas, cantidadPerdidas );
 			 registros.add( registro );
 		 }
 		 
@@ -205,9 +205,12 @@ public class AdministradorUsuarios
 				String insert = "INSERT INTO resultados (login, cantidadGanadas, cantidadPerdidas) VALUES ('" + pLogin + "', 0,0)";
 				st.execute( insert );
 				insert = "INSERT INTO usuarios (login, nombre, contrasenia) VALUES ('" + pLogin + "','" + pNombre + "' , '" + pContrasenia + "')";
+				st = conexion.createStatement();
 				st.execute(insert);
 				registro = new RegistroJugador(pNombre,pLogin, 0, 0);
 			}
+			else 
+				throw new AdivinaQuienServidorException("ya existia un usuario registrado con dicho login");
 		}
 		return registro;
 	}

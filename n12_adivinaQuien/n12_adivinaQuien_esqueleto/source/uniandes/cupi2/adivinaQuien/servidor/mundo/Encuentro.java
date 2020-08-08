@@ -112,6 +112,15 @@ public class Encuentro extends Thread
      */
     public static final String SEPARADOR_PARAMETROS = ":::";
     
+    /**
+     * cantidad de fichas en el tablero del jugador1
+     */
+    private int tablero1;
+    
+    /**
+     * cantidad de fichas en el tablero del jugador2
+     */
+    private int tablero2;
     
     
     /**
@@ -230,6 +239,8 @@ public class Encuentro extends Thread
     	out2 = new PrintWriter( canal2.getOutputStream(),true );
     	in2 = new BufferedReader( new InputStreamReader( canal2.getInputStream( ) ) );
     	socketJugador2 = canal2;
+    	
+    	tablero1 = tablero2 = 24;
     	
     	finJuego = false;
     }
@@ -688,7 +699,11 @@ public class Encuentro extends Thread
 	        	String cantidadDePersonas = jugador1In.readLine();
 	        	
 	        	String[] partes = cantidadDePersonas.split( SEPARADOR_COMANDO );
-	        	
+	        	int nuevo = Integer.valueOf(partes[1]);
+	        	if(jugador == 1)
+	        		tablero1 = nuevo;
+	        	else
+	        		tablero2 = nuevo;
 	        	
 	        	if(partes[1].compareTo("1") == 0) {
 	        		String guest = jugador1In.readLine();
@@ -762,7 +777,7 @@ public class Encuentro extends Thread
         RegistroJugador j1 = jugador1.darRegistroJugador( );
         RegistroJugador j2 = jugador2.darRegistroJugador( );
 
-        String cadena = "Jugador 1:" +j1.darNombreJugador( ) + ",Jugador 2:" +  j2.darNombreJugador( );
+        String cadena = j1.darNombreJugador( ) + ": " + tablero1 + " - " + j2.darNombreJugador( ) + ": " + tablero2;
         return cadena;
     }
     

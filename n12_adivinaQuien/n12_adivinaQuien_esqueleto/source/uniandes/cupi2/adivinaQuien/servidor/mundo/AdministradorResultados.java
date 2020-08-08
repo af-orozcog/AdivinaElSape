@@ -126,7 +126,7 @@ public class AdministradorResultados
 	  */
 	 public void registrarDerrota ( String login) throws SQLException
 	 {
-		 String sql = "UPDATE resultados SET cantidadPerdidas = cantidadPerdidas+1 WHERE logih ='" + login + "'";
+		 String sql = "UPDATE resultados SET cantidadPerdidas = cantidadPerdidas+1 WHERE login ='" + login + "'";
 		 
 		 Statement st = conexion.createStatement();
 		 st.executeUpdate( sql );
