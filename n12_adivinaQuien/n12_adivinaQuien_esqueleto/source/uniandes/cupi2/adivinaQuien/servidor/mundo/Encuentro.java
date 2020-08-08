@@ -191,8 +191,20 @@ public class Encuentro extends Thread
      */
     private AdministradorUsuarios adminUsuarios;
     
+    /**
+     * jugador que esta actualmente jugando
+     */
     private int Jugador;
     
+    /**
+     * nombre de la persona asignada al jugador1
+     */
+    private String asignado1;
+    
+    /**
+     * nombre de la persona asignada al jugador2
+     */
+    private String asignado2;
     
     //----------------------------------------------
     // CONSTRUCTOR
@@ -441,8 +453,38 @@ public class Encuentro extends Thread
         out.println( cadena );
 	}
 	
-	private void preguntaDeJugador(PrintWriter out, String pregunta) {
-		
+	/**
+	 * Envia la informacion del jugador que comienza el juego
+	 * @param out canal de comunicacion del jugador
+	 * @param pregunta informacion del jugador que comienza el juego
+	 */
+	private void enviarPreguntaDeJugador(PrintWriter out, String pregunta) {
+		String cadena = pregunta;
+		out.println(cadena);
+	}
+	
+	/**
+	 * Reenvia la respuesta recibida por el jugador
+	 * @param out canal de comunicacion del jugador
+	 * @param respuesta informacion de respuesta
+	 */
+	private void enviarRespuestaJugador(PrintWriter out, String respuesta) {
+		String cadena = respuesta;
+		out.println(cadena);
+	}
+	
+	/**
+	 * Metodo que notifica al jugador correspondiente que es su turno
+	 * @param out canal de comunicacion del jugador
+	 */
+	private void notificarTurno(PrintWriter out) {
+		String cadena = TURNO;
+		out.println(cadena);
+	}
+	
+	private void enviarRespuestaAdivinar(PrintWriter out ,boolean correcto) {
+		String cadena = ADIVINAR + SEPARADOR_COMANDO + (correcto ? "CORRECTO": "INCORRECTO");
+		out.println(cadena);
 	}
 	
 	
@@ -549,6 +591,8 @@ public class Encuentro extends Thread
         	enviarInicioJuego(out1, 2,imagen1);
         	enviarInicioJuego(out2, 1, imagen2);
         }  
+        asignado1 = nombreJugadores[imagen1];
+        asignado2 = nombreJugadores[imagen2];
     }
     
     /**
@@ -584,8 +628,8 @@ public class Encuentro extends Thread
             throw new AdivinaQuienServidorException( "Error actualizando la información en la base de datos: " + e.getMessage( ) );
         }
         // Enviar un mensaje indicando el fin del juego y el ganador
-        //String cadenaGanador = GANADOR + ":" + ganador.darNombreJugador( );
-        /*out1.println( cadenaGanador );
+        String cadenaGanador = FIN + SEPARADOR_COMANDO + ganador.darLoginJugador();
+        out1.println( cadenaGanador );
         out2.println( cadenaGanador );
 
         // Cerrar los canales de los jugadores
@@ -595,7 +639,7 @@ public class Encuentro extends Thread
         in2.close( );
         socketJugador1.close( );
         socketJugador2.close( );
-    	*/
+ 
     }
     
     
@@ -622,48 +666,62 @@ public class Encuentro extends Thread
         
         if(lineaJugada != null)
         {
-        	// Reenviar el "ataque" al jugador atacado
+        	// Reenviar la pregunta del jugador que esta preguntado
+        	try {
+        		enviarPreguntaDeJugador(jugador2Out, lineaJugada);
+        	}catch(Exception e) {
+        		e.printStackTrace();
+        		return;
+        	}
+        	// respuesta de si o no de parte del contrincante
+        	String respuestaPregunta = jugador2In.readLine();
         	
-        	if(lineaJugada.startsWith("")) {
-        		if(lineaJugada.startsWith(BARAJA_INICIAL))
-        			try {
-        				enviarCartas(jugador1Out, null);
-        			}catch(Exception e ) {
-        				System.out.println(e.getMessage());
+        	try {
+        		enviarRespuestaJugador(jugador1Out, respuestaPregunta);
+        	}catch(Exception e) {
+        		e.printStackTrace();
+        		return;
+        	}
+        	
+        	//cantidad de personas que quedan en el tablero de la persona
+        	String cantidadDePersonas = jugador1In.readLine();
+        	
+        	String[] partes = cantidadDePersonas.split( SEPARADOR_COMANDO );
+        	
+        	if(partes[1].compareTo("1") == 0) {
+        		String guest = jugador1In.readLine();
+        		partes = guest.split(SEPARADOR_COMANDO);
+        		if(jugador == 1) {
+        			if(asignado2.compareTo(partes[1]) == 0) {
+        				enviarRespuestaAdivinar(jugador1Out, true);
+        				jugador1.cambiarVictoria();
+        				finJuego = true;
         			}
-        		else
-        			jugador1Out.println(cartaAbierta);
-        			
-        		// Leer la información sobre el resultado del ataque que envía el jugador atacado
-        		String lineaResultado = jugador1In.readLine( );
-        		if( !lineaResultado.startsWith("CARTA"))
-        			throw new ContinentalException( "Se esperaba el resultado de una JUGADA pero se recibió " + lineaResultado );
-        		cartaAbierta = lineaResultado;
-        		jugador2Out.println(cartaAbierta);
-        	}
-        	// Rvisar el resultado para saber si el encuentro termina y actualizar los puntajes
-        	else if( lineaJugada.startsWith( VICTORIA))
-        	{
-        		ArrayList<Carta> cartasJugador = new ArrayList<Carta>();
-        		for(int i = 0; i < 7; i++) {
-        			String valores[] = jugador1In.readLine().split(":");
-        			if(!valores[0].equals("CARTA"))
-        				throw new ContinentalException("se esperaba la lectura de una carta pero se recibio: " + valores[0]);
-        			Carta meter = new Carta(valores[1], valores[2],valores[3]);
-        			cartasJugador.add(meter);
+        			else {
+        				enviarRespuestaAdivinar(jugador1Out, false);
+        				notificarTurno(jugador2Out);
+        			}
         		}
-        		organizar(cartasJugador);
-        		boolean vic = determinarVictoria(cartasJugador);
-        		String verdad = vic ? "OK": "FALSA";
-        		JugadorRemoto actual = ( jugador == 1 ) ? jugador1 : jugador2;
-        		if(vic) actual.cambiarVictoria();
-        		jugador1Out.println(VICTORIA + ":" +verdad);
-        		jugador2Out.println(VICTORIA + ":" +verdad);
-        		finJuego = true;	
+        		else {
+        			if(asignado1.compareTo(partes[1]) == 0) {
+        				enviarRespuestaAdivinar(jugador1Out, true);
+        				jugador2.cambiarVictoria();
+        				finJuego = true;
+        			}
+        			else {
+        				enviarRespuestaAdivinar(jugador1Out, false);
+        				notificarTurno(jugador2Out);
+        			}
+        		}
         	}
-        }
-        
+        	else 
+        		notificarTurno(jugador2Out);
+        	
+        	// Rvisar el resultado para saber si el encuentro termina y actualizar los puntajes
+        		
+        	}
     }
+        
     
     
     // -----------------------------------------------------------------
