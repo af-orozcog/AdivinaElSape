@@ -4,7 +4,7 @@ import java.io.*;
 import java.sql.*;
 import java.util.*;
 
-import uniandes.cupi2.adivinaQuien.cliente.mundo.RegistroJugador;
+import uniandes.cupi2.adivinaQuien.servidor.mundo.RegistroJugador;
 
 public class AdministradorResultados 
 {
@@ -103,73 +103,7 @@ public class AdministradorResultados
 		 
 		 s.close();
 	 }
-	 
-	 /**
-	  * Este método se encarga de consultar la información de un jugador (encuentros ganados y encuentros perdidos). <br>
-	  * Si no se encuentra un registro del jugador en la base de datos, entonces se crea uno nuevo.
-	  * @param pLogin
-	  * @return
-	  * @throws SQLException
-	  */
-	 public RegistroJugador consultarRegistroJugador ( String pLogin ) throws SQLException
-	 {
-		 RegistroJugador registro = null;
-		 
-		 String sql = "SELECT cantidadGanadas, cantidadPerdidas FROM resultados WHERE login ='" + pLogin + "'";
-		 Statement st = conexion.createStatement( );
-		 ResultSet resultado = st.executeQuery( sql );
-		 
-		 if ( resultado.next() )
-		 {
-			 int cantidadGanadas = resultado.getInt(1);
-			 int cantidadPerdidas = resultado.getInt(2);
-			 
-			 registro = new RegistroJugador ( pLogin, cantidadGanadas, cantidadPerdidas );
-			 
-			 resultado.close( );
-		 }
-		 else
-		 {
-			 resultado.close();
-			 
-			 String insert = "INSERT into resultados (login, cantidadGanadas, cantidadPerdidas) VALUES ('" + pLogin + "',0,0)";
-			 st.execute( insert );
-
-			 registro = new RegistroJugador( pLogin,0,0);
-		 }
-		 st.close();
-		 return registro;
-	 }
-	 
-	 /**
-	  * Este método se encarga de consultar la información de todos los jugadores (encuentros ganados y encuentros perdidos).
-	  * @return Retorna una colección de los registros (RegistroJugador) de victorias y derrotas
-	  * @throws SQLException Se lanza esta excepción si hay problemas en la comunicación con la base de datos
-	  */
-	 public Collection consultarRegistrosJugadores( ) throws SQLException
-	 {
-		 Collection registros = new LinkedList();
-		 
-		 String sql = " SELECT login, cantidadGanadas, cantidadPerdidas FROM resultados";
-		 
-		 Statement st = conexion.createStatement( );
-		 ResultSet resultado = st.executeQuery( sql );
-		 
-		 while ( resultado.next() )
-		 {
-			 String login = resultado.getString( 1 );
-			 int cantidadGanadas = resultado.getInt( 2 );
-			 int cantidadPerdidas = resultado.getInt( 3 );
-			 
-			 RegistroJugador registro = new RegistroJugador ( login, cantidadGanadas, cantidadPerdidas );
-			 registros.add( registro );
-		 }
-		 
-		 resultado.close();
-		 st.close();
-		 
-		 return registros;
-	 }
+	
 	 
 	 /**
 	  * Registra una victoria para el jugador

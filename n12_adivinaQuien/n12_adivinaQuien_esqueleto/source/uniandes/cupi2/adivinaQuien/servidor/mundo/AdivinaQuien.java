@@ -121,7 +121,7 @@ public class AdivinaQuien {
 	 */
 	public Collection consultarRegistrosJugadores() throws SQLException
 	{
-		return adminResultados.consultarRegistrosJugadores();
+		return adminUsuarios.consultarRegistrosJugadores( );
 	}
 	
 	/**

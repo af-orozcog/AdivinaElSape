@@ -146,6 +146,38 @@ public class AdministradorUsuarios
 	}
 	
 	/**
+	  * Este método se encarga de consultar la información de todos los jugadores (encuentros ganados y encuentros perdidos).
+	  * @return Retorna una colección de los registros (RegistroJugador) de victorias y derrotas
+	  * @throws SQLException Se lanza esta excepción si hay problemas en la comunicación con la base de datos
+	  */
+	 public Collection consultarRegistrosJugadores( ) throws SQLException
+	 {
+		 Collection registros = new LinkedList();
+		 
+		 String sql = " SELECT login, cantidadGanadas, cantidadPerdidas FROM resultados";
+		 
+		 Statement st = conexion.createStatement( );
+		 ResultSet resultado = st.executeQuery( sql );
+		 
+		 while ( resultado.next() )
+		 {
+			 String login = resultado.getString( 1 );
+			 int cantidadGanadas = resultado.getInt( 2 );
+			 int cantidadPerdidas = resultado.getInt( 3 );
+			 
+			 RegistroJugador registro = new RegistroJugador ( login, null,cantidadGanadas, cantidadPerdidas );
+			 registros.add( registro );
+		 }
+		 
+		 resultado.close();
+		 st.close();
+		 
+		 return registros;
+	 }
+	
+	
+	
+	/**
 	 * Registra al usuario en la base de datos si no existe
 	 * @param pLogin
 	 * @param pNombre

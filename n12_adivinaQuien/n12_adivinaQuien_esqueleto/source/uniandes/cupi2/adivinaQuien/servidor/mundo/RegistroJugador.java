@@ -89,7 +89,7 @@ public class RegistroJugador {
      */
     public String toString( )
     {
-        return "INFO: "+ nombre + ": " + ganados + " victorias: " + perdidos + " derrotas";
+        return  nombre + "- Ganadas: " + ganados + " - Perdidas: " + perdidos;
     }
 
 
@@ -107,7 +107,6 @@ public class RegistroJugador {
     private void verificarInvariante( )
     {
         assert ( nombre != null ) : "El nombre no puede ser null";
-        assert (login  != null) : "el login del jugador no puede ser nulo";
         assert ( ganados >= 0 ) : "El número de encuentros ganados debe ser mayor o igual a 0";
         assert ( perdidos >= 0 ) : "El número de encuentros perdidos debe ser mayor o igual a 0";
     }
