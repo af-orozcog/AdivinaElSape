@@ -103,7 +103,7 @@ public class AdivinaQuien {
 	{
 		Collection listaActualizada = new Vector();
 		
-		/*// Se construye la nueva lista actualizada
+		// Se construye la nueva lista actualizada
 		Iterator iter = encuentros.iterator();
 		while (iter.hasNext())
 		{
@@ -111,8 +111,8 @@ public class AdivinaQuien {
 			if (!e.encuentroTerminado() )
 				listaActualizada.add(e);
 		}
-		 encuentros = listaActualizada;*/
-		 return encuentros;
+		encuentros = listaActualizada;
+		return encuentros;
 	}
 	
 	/**

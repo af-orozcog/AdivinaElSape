@@ -742,6 +742,31 @@ public class Encuentro extends Thread
     	return ans;
     }
     
+    /**
+     * retorna true o false, según si el encuentro ha terminado.
+     * @return finJuego
+     */
+    public boolean encuentroTerminado( )
+    {
+        return finJuego;
+    }
+    
+    
+    /**
+     * Retorna una cadena con la información del encuentro con el siguiente formato:<br>
+     * <jugador1> ( <puntos> ) - <jugador2> ( <puntos> )
+     * @return cadena
+     */
+    public String toString( )
+    {
+        RegistroJugador j1 = jugador1.darRegistroJugador( );
+        RegistroJugador j2 = jugador2.darRegistroJugador( );
+
+        String cadena = "Jugador 1:" +j1.darNombreJugador( ) + ",Jugador 2:" +  j2.darNombreJugador( );
+        return cadena;
+    }
+    
+    
     
     // -----------------------------------------------------------------
     // Invariante

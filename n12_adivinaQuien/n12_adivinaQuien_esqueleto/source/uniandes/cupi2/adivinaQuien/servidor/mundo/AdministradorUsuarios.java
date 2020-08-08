@@ -49,13 +49,7 @@ public class AdministradorUsuarios
 		 Class.forName( driver ).newInstance();
 		 
 		 String url = config.getProperty( "admin.db.url");
-		try {
-			conexion = DriverManager.getConnection(url);
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-			throw new Exception("lil");
-		}
+		 conexion = DriverManager.getConnection(url);
 	}
 	
 	/**
@@ -179,6 +173,7 @@ public class AdministradorUsuarios
 				String insert = "INSERT INTO resultados (login, cantidadGanadas, cantidadPerdidas) VALUES ('" + pLogin + "', 0,0)";
 				st.execute( insert );
 				insert = "INSERT INTO usuarios (login, nombre, contrasenia) VALUES ('" + pLogin + "','" + pNombre + "' , '" + pContrasenia + "')";
+				st.execute(insert);
 				registro = new RegistroJugador(pNombre,pLogin, 0, 0);
 			}
 		}
