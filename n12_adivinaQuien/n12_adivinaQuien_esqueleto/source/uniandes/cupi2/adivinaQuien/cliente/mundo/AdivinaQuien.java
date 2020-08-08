@@ -360,6 +360,7 @@ public class AdivinaQuien
             outWriter.println( mensaje );
             String respuesta = inReader.readLine( );
             
+            
             String[] partes = respuesta.split( SEPARADOR_COMANDO );
             if( partes[ 0 ].equals( ERROR ) )
             {
@@ -393,6 +394,7 @@ public class AdivinaQuien
         try
         {
             String linea = inReader.readLine( );
+            System.out.println("quien es el re puto rival " + linea);
             String[] partes = linea.split( SEPARADOR_COMANDO );
             if( partes[ 0 ].equals( ERROR ) )
             {
@@ -420,6 +422,7 @@ public class AdivinaQuien
         try
         {
             String linea = inReader.readLine( );
+            System.out.println("quien es la re puta persona asignada " + linea);
             String[] partes = linea.split( SEPARADOR_COMANDO );
             if( partes[ 0 ].equals( ERROR ) )
             {

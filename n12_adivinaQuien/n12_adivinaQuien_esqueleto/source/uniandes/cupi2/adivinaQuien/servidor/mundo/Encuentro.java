@@ -3,10 +3,12 @@ package uniandes.cupi2.adivinaQuien.servidor.mundo;
 import java.io.*;
 import java.net.*;
 import java.sql.*;
+import java.util.ArrayList;
 
 import uniandes.cupi2.adivinaQuien.cliente.*;
 import uniandes.cupi2.adivinaQuien.cliente.mundo.AdivinaQuienClienteException;
 import uniandes.cupi2.adivinaQuien.servidor.mundo.RegistroJugador;
+
 
 
 public class Encuentro extends Thread
@@ -110,7 +112,27 @@ public class Encuentro extends Thread
      */
     public static final String SEPARADOR_PARAMETROS = ":::";
     
- // -----------------------------------------------------------------
+    
+    
+    /**
+     * nombres de los jugadores
+     */
+    public static final String nombreJugadores[] = {"Alejandro","Anita","Pedro","Eric","Carlos","Samuel","Juan","Maria"
+    		,"Felipe","Ricardo","Susana","Max","Alfredo","Roberto","Francisco","Clara"
+    		,"Pablo","Fernando","Fernando","David","Bernardo","Jorge","Tom","Guillermo"
+    		,"Adriana"};
+    
+    
+    /**
+     * nombres de los archivos de imagen de los jugadores
+     */
+    public static final String imagenesJugadores[] = {"alejandro.png","anita.png","pedro.png","eric.png","carlos.png","samuel.png","juan.png","maria.png"
+    		,"felipe.png","ricardo.png","susana.png","max.png","alfredo.png","roberto.png","francisco.png","clara.png"
+    		,"pablo.png","fernando.png","fernando.png","david.png","bernardo.png","jorge.png","tom.png","guillermo.png"
+    		,"adriana.png"};
+    
+    
+    // -----------------------------------------------------------------
     // Atributos
     // -----------------------------------------------------------------
 
@@ -193,7 +215,7 @@ public class Encuentro extends Thread
     	in1 = new BufferedReader ( new InputStreamReader( canal1.getInputStream( ) ) );
     	socketJugador1 = canal1;
     	
-    	out2 = new PrintWriter( canal1.getOutputStream(),true );
+    	out2 = new PrintWriter( canal2.getOutputStream(),true );
     	in2 = new BufferedReader( new InputStreamReader( canal2.getInputStream( ) ) );
     	socketJugador2 = canal2;
     	
@@ -314,11 +336,11 @@ public class Encuentro extends Thread
             while( !finJuego )
             {
        
-               // procesarJugada( Jugador );
+                procesarJugada( Jugador );
 
                 if( finJuego )
                 {
-                  //  terminarEncuentro( );
+                    terminarEncuentro( );
                 
                 }
                 else
@@ -383,8 +405,8 @@ public class Encuentro extends Thread
 	 * @param out canal de comunicacion del jugador
      * @param reg informacion del jugador
 	 */
-	private void enviarInformacionOponent(PrintWriter out, RegistroJugador reg) {
-		 String cadena = INICIO + SEPARADOR_COMANDO + reg.darLoginJugador() + SEPARADOR_PARAMETROS + reg.darEncuentrosGanados( ) + SEPARADOR_PARAMETROS + reg.darEncuentrosPerdidos( );
+	private void enviarInformacionOponente(PrintWriter out, RegistroJugador reg) {
+		 String cadena = INFO_JUGADOR + SEPARADOR_COMANDO + reg.darLoginJugador() + SEPARADOR_PARAMETROS + reg.darEncuentrosGanados( ) + SEPARADOR_PARAMETROS + reg.darEncuentrosPerdidos( );
 	     out.println( cadena );
 	}
     
@@ -414,9 +436,13 @@ public class Encuentro extends Thread
 	 * @param out canal de comunicacion del jugador
 	 * @param reg informacion del jugador que comienza el juego
 	 */
-	private void enviarInicioJuego( PrintWriter out, RegistroJugador reg) {
-		String cadena = ERROR + SEPARADOR_COMANDO + "El usuario no esta registrado";
+	private void enviarInicioJuego( PrintWriter out, int turno, int persona) {
+		String cadena = INICIO + SEPARADOR_COMANDO + turno + SEPARADOR_PARAMETROS + nombreJugadores[persona] + SEPARADOR_PARAMETROS + imagenesJugadores[persona];
         out.println( cadena );
+	}
+	
+	private void preguntaDeJugador(PrintWriter out, String pregunta) {
+		
 	}
 	
 	
@@ -495,30 +521,152 @@ public class Encuentro extends Thread
         		throw new AdivinaQuienServidorException("F");
         	}
         }
+        System.out.println("jugador 1 nombre es: " + reg1.darNombreJugador() + " jugador 2 nombre es: " + reg2.darNombreJugador());
+        
         jugador2 = new JugadorRemoto( reg2 );
        
         // Enviar a cada jugador la informacion de su oponente
-        enviarInformacionOponent(out1, reg2);
-        enviarInformacionOponent(out2, reg1);
+        enviarInformacionOponente(out1, reg2);
+        enviarInformacionOponente(out2, reg1);
         
         //elige de manera aleatoria el primer jugador que va a comenzar
-        int inicioTurno = (int) Math.floor(Math.random()*2+1);
+        int inicioTurno = (int) Math.floor(Math.random()*1+1);
+        
+        int imagen1 = (int) Math.floor(Math.random()*nombreJugadores.length);
+        int imagen2 = (int) Math.floor(Math.random()*nombreJugadores.length);
+        if(imagen2 == imagen1) {
+        	++imagen2;
+        	imagen2 %= nombreJugadores.length;
+        }
         
         if(inicioTurno == 0) {
         	Jugador = 1;
-        	enviarInicioJuego(out1, reg1);
-        	enviarInicioJuego(out2, reg1);
+        	enviarInicioJuego(out1, 1, imagen1);
+        	enviarInicioJuego(out2, 2, imagen2);
         }
         else {
         	Jugador = 2;
-        	enviarInicioJuego(out1, reg2);
-        	enviarInicioJuego(out2, reg2);
+        	enviarInicioJuego(out1, 2,imagen1);
+        	enviarInicioJuego(out2, 1, imagen2);
         }  
     }
     
+    /**
+     * Realiza las actividades necesarias para terminar un encuentro: <br>
+     * 1. Actualiza los registros de los jugadores en la base de datos <br>
+     * 2. Envía un mensaje a los jugadores advirtiendo sobre el fin del juego y el nombre del ganador <br>
+     * 3. Cierra las conexiones a los jugadores
+     * @throws ContinentalException se lanza dicha excepción cuando hay problemas para acceder a la base datos
+     * @throws IOException se lanza dicha excepción cuando hay problemas en la comunicación con los jugadores.
+     */
+    private void terminarEncuentro( ) throws AdivinaQuienServidorException, IOException
+    {
+        // Actualizar el registro de los jugadores
+        RegistroJugador ganador = null;
+        RegistroJugador perdedor = null;
+        if( jugador1.darVictoria())
+        {
+            ganador = jugador1.darRegistroJugador( );
+            perdedor = jugador2.darRegistroJugador( );
+        }
+        else
+        {
+            ganador = jugador2.darRegistroJugador( );
+            perdedor = jugador1.darRegistroJugador( );
+        }
+        try
+        {
+            adminResultados.registrarVictoria( ganador.darNombreJugador( ) );
+            adminResultados.registrarDerrota( perdedor.darNombreJugador( ) );
+        }
+        catch( SQLException e )
+        {
+            throw new AdivinaQuienServidorException( "Error actualizando la información en la base de datos: " + e.getMessage( ) );
+        }
+        // Enviar un mensaje indicando el fin del juego y el ganador
+        //String cadenaGanador = GANADOR + ":" + ganador.darNombreJugador( );
+        /*out1.println( cadenaGanador );
+        out2.println( cadenaGanador );
+
+        // Cerrar los canales de los jugadores
+        in1.close( );
+        out1.close( );
+        out2.close( );
+        in2.close( );
+        socketJugador1.close( );
+        socketJugador2.close( );
+    	*/
+    }
     
     
- // -----------------------------------------------------------------
+    /**
+     * método encargado de procesar las jugadas de los jugadores <br>
+     * 1. manda la carta solicitada por el jugador.
+     * 2. actualiza la baraja visible para ambos jugadores.
+     * actualiza el atributo fin juego cuando se determine que el juego se tiene que acabar.
+     * @param jugador identificación de cual jugador esta jugando. 
+     * @throws IOException se lanza cuando existen problemas para enviar y recibir mensajes.
+     * @throws ContinentalException se lanza cuando hay inconsistencia en la información recibida por los jugadores.
+     */
+    private void procesarJugada( int jugador ) throws IOException, AdivinaQuienServidorException
+    {
+        PrintWriter jugador1Out = ( jugador == 1 ) ? out1 : out2;
+        PrintWriter jugador2Out = ( jugador == 1 ) ? out2 : out1;
+
+        BufferedReader jugador1In = ( jugador == 1 ) ? in1 : in2;
+        BufferedReader jugador2In = ( jugador == 1 ) ? in2 : in1;
+
+        // Leer la jugada del "atacante" que indica donde se va a hacer el ataque
+        String lineaJugada = jugador1In.readLine( );
+        
+        
+        if(lineaJugada != null)
+        {
+        	// Reenviar el "ataque" al jugador atacado
+        	
+        	if(lineaJugada.startsWith("")) {
+        		if(lineaJugada.startsWith(BARAJA_INICIAL))
+        			try {
+        				enviarCartas(jugador1Out, null);
+        			}catch(Exception e ) {
+        				System.out.println(e.getMessage());
+        			}
+        		else
+        			jugador1Out.println(cartaAbierta);
+        			
+        		// Leer la información sobre el resultado del ataque que envía el jugador atacado
+        		String lineaResultado = jugador1In.readLine( );
+        		if( !lineaResultado.startsWith("CARTA"))
+        			throw new ContinentalException( "Se esperaba el resultado de una JUGADA pero se recibió " + lineaResultado );
+        		cartaAbierta = lineaResultado;
+        		jugador2Out.println(cartaAbierta);
+        	}
+        	// Rvisar el resultado para saber si el encuentro termina y actualizar los puntajes
+        	else if( lineaJugada.startsWith( VICTORIA))
+        	{
+        		ArrayList<Carta> cartasJugador = new ArrayList<Carta>();
+        		for(int i = 0; i < 7; i++) {
+        			String valores[] = jugador1In.readLine().split(":");
+        			if(!valores[0].equals("CARTA"))
+        				throw new ContinentalException("se esperaba la lectura de una carta pero se recibio: " + valores[0]);
+        			Carta meter = new Carta(valores[1], valores[2],valores[3]);
+        			cartasJugador.add(meter);
+        		}
+        		organizar(cartasJugador);
+        		boolean vic = determinarVictoria(cartasJugador);
+        		String verdad = vic ? "OK": "FALSA";
+        		JugadorRemoto actual = ( jugador == 1 ) ? jugador1 : jugador2;
+        		if(vic) actual.cambiarVictoria();
+        		jugador1Out.println(VICTORIA + ":" +verdad);
+        		jugador2Out.println(VICTORIA + ":" +verdad);
+        		finJuego = true;	
+        	}
+        }
+        
+    }
+    
+    
+    // -----------------------------------------------------------------
     // Invariante
     // -----------------------------------------------------------------
 
