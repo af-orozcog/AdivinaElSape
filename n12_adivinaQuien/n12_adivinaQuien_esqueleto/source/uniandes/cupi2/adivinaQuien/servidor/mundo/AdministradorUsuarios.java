@@ -45,11 +45,17 @@ public class AdministradorUsuarios
 	 */
 	public void conectarABD( ) throws SQLException, Exception
 	{
-		String driver = config.getProperty( "admin.db.driver" );
-		Class.forName( driver ).newInstance( );
-		
-		String url = config.getProperty( " admin.db.url" );
-		conexion = DriverManager.getConnection(url);
+		 String driver = config.getProperty( "admin.db.driver" );
+		 Class.forName( driver ).newInstance();
+		 
+		 String url = config.getProperty( "admin.db.url");
+		try {
+			conexion = DriverManager.getConnection(url);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			throw new Exception("lil");
+		}
 	}
 	
 	/**
@@ -89,7 +95,7 @@ public class AdministradorUsuarios
 		}
 		if ( crearTabla)
 		{
-			s.execute("CREATE TABLE usuarios (login varchar(32)), (nombre varchar(32)), contrasenia varchar(32)),PRIMARY KEY (login))");	
+			s.execute("CREATE TABLE usuarios (login varchar(32), nombre varchar(32), contrasenia varchar(32),PRIMARY KEY (login))");	
 		}
 		s.close();
 	}
@@ -163,14 +169,14 @@ public class AdministradorUsuarios
 		}
 		catch (AdivinaQuienServidorException e)
 		{
-			e.printStackTrace();
-			return null;
+			if(e.getMessage().compareTo(" El usuario no está registrado") != 0)
+				return null;
 		}
 		finally
 		{
 			if (registro == null) {
 				Statement st = conexion.createStatement( );
-				String insert = "INSERT INTO resultados (login, ganados, perdidos) VALUES ('" + pLogin + "', 0,0)";
+				String insert = "INSERT INTO resultados (login, cantidadGanadas, cantidadPerdidas) VALUES ('" + pLogin + "', 0,0)";
 				st.execute( insert );
 				insert = "INSERT INTO usuarios (login, nombre, contrasenia) VALUES ('" + pLogin + "','" + pNombre + "' , '" + pContrasenia + "')";
 				registro = new RegistroJugador(pNombre,pLogin, 0, 0);

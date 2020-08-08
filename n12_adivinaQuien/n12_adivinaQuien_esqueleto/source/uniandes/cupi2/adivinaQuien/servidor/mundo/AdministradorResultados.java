@@ -98,7 +98,7 @@ public class AdministradorResultados
 		 // Se crea una tabla vacia
 		 if  ( crearTabla )
 		 {
-			 s.execute( "CREATE TABLE resultados (login varchar(32)),  cantidadGanadas int, cantidadPerdidas int, PRIMARY KEY (login))");
+			 s.execute( "CREATE TABLE resultados (login varchar(32),  cantidadGanadas int, cantidadPerdidas int, PRIMARY KEY (login))");
 		 }
 		 
 		 s.close();
